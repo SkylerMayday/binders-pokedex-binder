@@ -1,0 +1,32 @@
+{
+  "entries": [
+    {
+      "publishedAt": "2026-07-04T21:00:00+08:00",
+      "summary": {
+        "added": 2,
+        "replaced": 1,
+        "removed": 0,
+        "pokedexComplete": 3,
+        "pokedexTotal": 1025
+      },
+      "changes": [
+        { "type": "ADDED", "slotId": "bulbasaur", "slotName": "Bulbasaur", "cardSet": "Base Set" },
+        { "type": "ADDED", "slotId": "venusaur", "slotName": "Venusaur", "cardSet": "Base Set" },
+        { "type": "REPLACED", "slotId": "charizard", "slotName": "Charizard", "cardSet": "Base Set" }
+      ]
+    },
+    {
+      "publishedAt": "2026-07-01T09:15:00+08:00",
+      "summary": {
+        "added": 1,
+        "replaced": 0,
+        "removed": 0,
+        "pokedexComplete": 1,
+        "pokedexTotal": 1025
+      },
+      "changes": [
+        { "type": "ADDED", "slotId": "charizard", "slotName": "Charizard", "cardSet": "Base Set" }
+      ]
+    }
+  ]
+}

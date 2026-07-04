@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "publishedAt": "2026-07-04T21:00:00+08:00",
+  "binders": [
+    {
+      "id": "pokedex",
+      "name": "Pokédex",
+      "sections": [
+        {
+          "name": "Generation I",
+          "slots": [
+            {
+              "dexNumber": 1,
+              "slotName": "Bulbasaur",
+              "slotType": "BASE",
+              "slotId": "bulbasaur",
+              "cardId": "base1-44",
+              "cardName": "Bulbasaur",
+              "cardSet": "Base Set",
+              "imageUrl": "https://images.pokemontcg.io/base1/44_hires.png"
+            },
+            {
+              "dexNumber": 2,
+              "slotName": "Ivysaur",
+              "slotType": "BASE",
+              "slotId": "ivysaur",
+              "cardId": null,
+              "cardName": null,
+              "cardSet": null,
+              "imageUrl": null
+            },
+            {
+              "dexNumber": 3,
+              "slotName": "Venusaur",
+              "slotType": "BASE",
+              "slotId": "venusaur",
+              "cardId": "base1-15",
+              "cardName": "Venusaur",
+              "cardSet": "Base Set",
+              "imageUrl": "https://images.pokemontcg.io/base1/15_hires.png"
+            },
+            {
+              "dexNumber": 4,
+              "slotName": "Charmander",
+              "slotType": "BASE",
+              "slotId": "charmander",
+              "cardId": null,
+              "cardName": null,
+              "cardSet": null,
+              "imageUrl": null
+            },
+            {
+              "dexNumber": 6,
+              "slotName": "Charizard",
+              "slotType": "BASE",
+              "slotId": "charizard",
+              "cardId": "base1-4",
+              "cardName": "Charizard",
+              "cardSet": "Base Set",
+              "imageUrl": "https://images.pokemontcg.io/base1/4_hires.png"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

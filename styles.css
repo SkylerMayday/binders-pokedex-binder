@@ -1,0 +1,176 @@
+:root {
+  --pokeball-red: #e3350d;
+  --bg: #f5f5f7;
+  --surface: #ffffff;
+  --text: #1c1c1e;
+  --text-muted: #6e6e73;
+  --border: #e0e0e3;
+  --empty-bg: #eceff1;
+  --bar-track: #e0e0e3;
+  --bar-fill: var(--pokeball-red);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+header.page-header {
+  padding: 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+header.page-header h1 {
+  margin: 0 0 4px;
+  font-size: 1.4rem;
+}
+
+.published-at {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+.bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--bar-track);
+  overflow: hidden;
+}
+
+.bar .fill {
+  height: 100%;
+  background: var(--bar-fill);
+  transition: width 0.3s ease;
+}
+
+.completion-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+main {
+  padding: 16px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.changelog-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+
+.changelog-panel h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.changelog-entry-latest {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+  margin-bottom: 8px;
+}
+
+.changelog-summary {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.change-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.9rem;
+}
+
+.change-list li { padding: 2px 0; }
+
+.change-added { color: #1a7f37; }
+.change-replaced { color: #9a6700; }
+.change-removed { color: #cf222e; }
+
+details.changelog-entry-old {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+section.binder-section {
+  margin-bottom: 24px;
+}
+
+section.binder-section h2 {
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+.section-bar-wrap {
+  margin-bottom: 10px;
+}
+
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 8px;
+}
+
+.slot {
+  aspect-ratio: 0.72;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.slot.empty {
+  background: var(--empty-bg);
+  flex-direction: column;
+  text-align: center;
+  padding: 4px;
+}
+
+.slot.empty .dex-number {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.slot.empty .slot-name {
+  font-size: 0.7rem;
+  margin-top: 2px;
+}
+
+footer {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  padding: 24px 16px;
+}
+
+@media (max-width: 480px) {
+  .slot-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
