@@ -3,22 +3,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0e0f13">
   <title>Pokédex Binder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="page-header" id="page-header">
-    <h1>Pokédex Binder</h1>
+    <div class="header-inner">
+      <div class="header-title-row">
+        <span class="pokeball-mark" aria-hidden="true"></span>
+        <h1>Pokédex Binder</h1>
+      </div>
+    </div>
   </header>
 
   <main>
     <div class="changelog-panel" id="changelog-panel"></div>
-    <div id="binders"></div>
+    <div id="binders">
+      <div class="skeleton-wrap" id="skeleton-wrap" aria-hidden="true">
+        <div class="skeleton skeleton-tile"></div>
+        <div class="skeleton skeleton-tile"></div>
+        <div class="skeleton skeleton-tile"></div>
+        <div class="skeleton skeleton-tile"></div>
+        <div class="skeleton skeleton-tile"></div>
+      </div>
+    </div>
   </main>
 
   <footer>
     Pokédex Binder — public view. Generated from the app's Publish action.
   </footer>
+
+  <div id="lightbox" class="lightbox" hidden role="dialog" aria-modal="true" aria-label="Card preview">
+    <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Close">&times;</button>
+    <img id="lightbox-img" src="" alt="">
+  </div>
 
   <script src="app.js"></script>
 </body>
