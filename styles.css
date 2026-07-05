@@ -30,6 +30,31 @@
 
   --radius: 12px;
   --radius-sm: 8px;
+
+  /* "Collector's Shelf" re-skin — wood shelf (brief §2.5) */
+  --wood-1: #6b4a2f;
+  --wood-2: #503722;
+  --wood-3: #3d2a19;
+  --wood-hi: #8a6440;
+  --grain: rgba(30, 18, 8, 0.5);
+
+  /* Leather spines (muted collector palette) */
+  --spine-oxblood: #6e2b2b;
+  --spine-forest: #2f5138;
+  --spine-navy: #26364f;
+  --spine-tobacco: #5a3d24;
+  --spine-slate: #3a4048;
+  --spine-other: #4a3550;
+
+  /* Spine detailing */
+  --spine-edge: rgba(0, 0, 0, 0.45);
+  --spine-sheen: rgba(255, 255, 255, 0.10);
+
+  /* Label plate */
+  --label-plate: #ece3d0;
+  --label-plate-2: #d8ccb2;
+  --label-text: #2b2419;
+  --label-border: rgba(0, 0, 0, 0.25);
 }
 
 * { box-sizing: border-box; }
@@ -260,63 +285,186 @@ details.changelog-entry-old summary:hover {
   color: var(--text);
 }
 
-/* ---------- Binder tiles (addendum §5.A) ---------- */
+/* ---------- Binder shelf (design-brief.md — "The Collector's Shelf") ----------
+ * RISK 1 mechanism chosen: flex-wrap row + full-width `flex-basis` break
+ * (the brief's own documented fallback), NOT `display: contents`.
+ * `display: contents` was tried first (the brief's suggested primary approach)
+ * but this environment's rendering engine has a real bug: descendant selectors
+ * like `.binder-tile.open .spine` match (confirmed via `Element.matches()`)
+ * yet never apply in computed style once an ancestor is `display: contents` —
+ * verified empirically by cloning the same classes onto a normal-display
+ * wrapper, where the identical rule applies correctly. So `.binder-tile` stays
+ * a normal (non-contents, non-grid-item) block; it is the flex item that flows
+ * into `.shelf`'s wrapping flex row.
+ *
+ * Each `.binder-tile` is `display: flex; flex-direction: column` internally
+ * so its own two children (spine button, then body) stack vertically — but the
+ * *tile itself* only reserves the spine's width in the shelf's flex row
+ * (`align-self`/`flex` sized to the button), and `.binder-tile-body` uses
+ * `flex-basis: 100%` (a standard flex-wrap "break to new full-width row"
+ * trick) so once a tile's body is un-hidden, it forces every subsequent spine
+ * onto a new plank row and the body itself spans the shelf's full width. This
+ * keeps `.binder-tile` fully intact (button + body, same ownership,
+ * `attachBinderTileHandlers` untouched) with zero grid/contents fragility.
+ */
 
-.binder-tile {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+.shelf-wrap {
   margin-bottom: var(--s6);
-  overflow: hidden;
 }
 
-.binder-tile-toggle {
-  width: 100%;
+.shelf {
   display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--s3);
+  padding: var(--s4) var(--s4) 14px;
+  border-radius: var(--radius);
+  background:
+    repeating-linear-gradient(
+      100deg,
+      var(--grain) 0px,
+      transparent 1px,
+      transparent 5px,
+      var(--grain) 6px,
+      transparent 8px
+    ),
+    linear-gradient(180deg, var(--wood-1) 0%, var(--wood-2) 100%);
+  background-blend-mode: overlay, normal;
+  border: 1px solid var(--wood-3);
+  border-bottom: 14px solid var(--wood-3);
+  box-shadow:
+    inset 0 2px 0 var(--wood-hi),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+    0 10px 22px rgba(0, 0, 0, 0.45);
+  position: relative;
+}
+
+.binder-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.binder-tile-body {
+  flex-basis: 100%;
+}
+
+/* ---------- Spine (re-skinned .binder-tile-toggle) ---------- */
+
+.spine {
+  width: 104px;
+  min-width: 96px;
+  height: 216px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--s4);
-  background: transparent;
-  border: none;
+  justify-content: center;
+  gap: var(--s2);
+  border: 1px solid var(--spine-edge);
+  border-radius: var(--radius) var(--radius) var(--radius-sm) var(--radius-sm);
   color: var(--text);
   font: inherit;
   cursor: pointer;
-  padding: var(--s4);
-  text-align: left;
+  padding: var(--s3) var(--s2);
+  text-align: center;
+  position: relative;
+  box-shadow:
+    inset 0 1px 0 var(--spine-sheen),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.15),
+    0 4px 10px rgba(0, 0, 0, 0.4);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
 }
 
-.binder-tile-toggle:hover {
-  background: var(--surface-2);
+/* Ring-binder band lines — decorative, cuttable */
+.spine::before,
+.spine::after {
+  content: "";
+  position: absolute;
+  left: 10%;
+  width: 80%;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.25);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
+  pointer-events: none;
 }
 
-.binder-tile-toggle:focus-visible {
+.spine::before { top: 14%; }
+.spine::after { bottom: 14%; }
+
+.spine--oxblood {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--spine-oxblood) 82%, black) 0%, var(--spine-oxblood) 20%, color-mix(in srgb, var(--spine-oxblood) 88%, white) 50%, var(--spine-oxblood) 80%, color-mix(in srgb, var(--spine-oxblood) 82%, black) 100%);
+}
+
+.spine--forest {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--spine-forest) 82%, black) 0%, var(--spine-forest) 20%, color-mix(in srgb, var(--spine-forest) 88%, white) 50%, var(--spine-forest) 80%, color-mix(in srgb, var(--spine-forest) 82%, black) 100%);
+}
+
+.spine--navy {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--spine-navy) 82%, black) 0%, var(--spine-navy) 20%, color-mix(in srgb, var(--spine-navy) 88%, white) 50%, var(--spine-navy) 80%, color-mix(in srgb, var(--spine-navy) 82%, black) 100%);
+}
+
+.spine--tobacco {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--spine-tobacco) 82%, black) 0%, var(--spine-tobacco) 20%, color-mix(in srgb, var(--spine-tobacco) 88%, white) 50%, var(--spine-tobacco) 80%, color-mix(in srgb, var(--spine-tobacco) 82%, black) 100%);
+}
+
+.spine--slate {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--spine-slate) 82%, black) 0%, var(--spine-slate) 20%, color-mix(in srgb, var(--spine-slate) 88%, white) 50%, var(--spine-slate) 80%, color-mix(in srgb, var(--spine-slate) 82%, black) 100%);
+}
+
+.spine--other {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--spine-other) 82%, black) 0%, var(--spine-other) 20%, color-mix(in srgb, var(--spine-other) 88%, white) 50%, var(--spine-other) 80%, color-mix(in srgb, var(--spine-other) 82%, black) 100%);
+}
+
+@media (hover: hover) {
+  .spine:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      inset 0 1px 0 var(--spine-sheen),
+      inset 0 0 0 1px rgba(0, 0, 0, 0.15),
+      0 10px 20px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.spine:focus-visible {
   outline: 2px solid var(--gold);
-  outline-offset: -2px;
+  outline-offset: 2px;
+}
+
+.binder-label-plate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  background: linear-gradient(180deg, var(--label-plate) 0%, var(--label-plate-2) 100%);
+  border: 1px solid var(--label-border);
+  border-radius: var(--radius-sm);
+  padding: var(--s2);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.3);
+  transition: box-shadow 0.16s ease;
 }
 
 .binder-tile-name {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 600;
-}
-
-.binder-tile-stats {
-  display: flex;
-  align-items: center;
-  gap: var(--s3);
+  color: var(--label-text);
+  line-height: 1.15;
+  overflow-wrap: break-word;
 }
 
 .binder-tile-count {
-  font-size: 0.85rem;
-  color: var(--text-muted);
+  font-size: 0.8rem;
+  color: var(--label-text);
   font-variant-numeric: tabular-nums;
 }
 
 .binder-tile-chevron {
   display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-right: 2px solid var(--text-muted);
-  border-bottom: 2px solid var(--text-muted);
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--text-faint);
+  border-bottom: 2px solid var(--text-faint);
   transform: rotate(45deg);
   transition: transform 0.2s ease;
 }
@@ -325,8 +473,28 @@ details.changelog-entry-old summary:hover {
   transform: rotate(-135deg);
 }
 
+/* Open state — the "pulled forward" spine (brief §2.3) */
+.binder-tile.open .spine {
+  transform: translateY(-6px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.1),
+    0 14px 26px rgba(0, 0, 0, 0.55);
+}
+
+.binder-tile.open .binder-label-plate {
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.2),
+    0 0 0 2px var(--gold),
+    0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
 .binder-tile-body {
-  padding: 0 var(--s4) var(--s4);
+  width: 100%;
+  padding: var(--s4) 0 0;
+  margin-top: var(--s3);
+  border-top: 2px solid var(--gold);
+  position: relative;
 }
 
 .binder-tile-body[hidden] {
@@ -475,8 +643,24 @@ section.binder-section h2 {
   animation: skeleton-shimmer 1.4s ease-in-out infinite;
 }
 
-.skeleton-tile {
-  height: 68px;
+/* Skeleton restyled to the spine footprint so loading -> loaded doesn't jump
+ * shape (brief RISK 4). Plain/un-textured row — no wood gradient while loading. */
+.skeleton-shelf {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--s3);
+  padding: var(--s4) var(--s4) 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--surface);
+}
+
+.skeleton-shelf .skeleton-tile {
+  width: 104px;
+  min-width: 96px;
+  height: 216px;
+  border-radius: var(--radius) var(--radius) var(--radius-sm) var(--radius-sm);
 }
 
 @keyframes skeleton-shimmer {
@@ -565,12 +749,21 @@ footer {
     padding: var(--s3);
   }
 
-  .binder-tile-toggle {
-    padding: var(--s3);
+  .shelf {
+    padding: var(--s3) var(--s3) 12px;
+    gap: var(--s2);
+    justify-content: center;
+  }
+
+  .spine {
+    width: 92px;
+    min-width: 88px;
+    height: 184px;
+    padding: var(--s2) var(--s1);
   }
 
   .binder-tile-body {
-    padding: 0 var(--s3) var(--s3);
+    padding: var(--s3) 0 0;
   }
 }
 
@@ -595,6 +788,15 @@ footer {
   }
 
   .slot.filled:hover {
+    transform: none;
+  }
+
+  .spine,
+  .spine:hover,
+  .binder-tile.open .spine,
+  .binder-label-plate,
+  .binder-tile.open .binder-label-plate {
+    transition: none;
     transform: none;
   }
 }

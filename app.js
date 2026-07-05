@@ -163,17 +163,33 @@ function displayBinderCompletion(displayBinder) {
 
 let binderTileOpenState = Object.create(null);
 
+/*
+ * Design brief §4 ("What Changes in the Files") — closed-tile chrome only.
+ * Per-tile spine color class assigned by displayBinder.id (no new data read).
+ * The 5 known ids map to the 5 leather colors from §2.5; anything unrecognized
+ * (the "Other" fallback bucket) gets the 6th plum spine color.
+ */
+const SPINE_COLOR_CLASS_BY_ID = {
+  'display-pokedex': 'spine--oxblood',
+  'display-regional': 'spine--forest',
+  'display-alternate': 'spine--navy',
+  'display-mega': 'spine--tobacco',
+  'display-vmax': 'spine--slate'
+};
+const SPINE_COLOR_CLASS_FALLBACK = 'spine--other';
+
 function renderBinderTile(displayBinder) {
   const { filled, total } = displayBinderCompletion(displayBinder);
   const isOpen = !!binderTileOpenState[displayBinder.id];
   const innerSections = displayBinder.sections.map(renderSection).join('');
+  const spineColorClass = SPINE_COLOR_CLASS_BY_ID[displayBinder.id] || SPINE_COLOR_CLASS_FALLBACK;
   return `<div class="binder-tile${isOpen ? ' open' : ''}" data-binder-id="${displayBinder.id}">
-    <button type="button" class="binder-tile-toggle" aria-expanded="${isOpen}" aria-controls="binder-body-${displayBinder.id}">
-      <span class="binder-tile-name">${escapeHtml(displayBinder.name)}</span>
-      <span class="binder-tile-stats">
+    <button type="button" class="binder-tile-toggle spine ${spineColorClass}" aria-expanded="${isOpen}" aria-controls="binder-body-${displayBinder.id}">
+      <span class="binder-label-plate">
+        <span class="binder-tile-name">${escapeHtml(displayBinder.name)}</span>
         <span class="binder-tile-count">${filled}/${total}</span>
-        <span class="binder-tile-chevron" aria-hidden="true"></span>
       </span>
+      <span class="binder-tile-chevron" aria-hidden="true"></span>
     </button>
     <div class="binder-tile-body" id="binder-body-${displayBinder.id}"${isOpen ? '' : ' hidden'}>
       ${innerSections}
@@ -213,7 +229,14 @@ function render(binderSnapshot, changelog) {
 
   const displayBinders = bucketSectionsIntoDisplayBinders(binderSnapshot);
   const main = document.getElementById('binders');
-  main.innerHTML = displayBinders.map(renderBinderTile).join('');
+  // Design brief §4 / RISK 1: wrap tiles in a shelf container. Each .binder-tile
+  // keeps full ownership of its own toggle button + body (untouched). The brief's
+  // suggested `display: contents` mechanism broke visually in this environment
+  // (verified via getBoundingClientRect, not just a computed-style quirk), so the
+  // shelf layout (styles.css) instead keeps `.binder-tile` as a normal flex item and
+  // forces `.binder-tile-body { flex-basis: 100% }` onto its own wrapped row beneath
+  // the spines — same visual result, zero DOM/logic restructuring here.
+  main.innerHTML = '<div class="shelf-wrap"><div class="shelf">' + displayBinders.map(renderBinderTile).join('') + '</div></div>';
 
   attachBinderTileHandlers(main);
   attachLightboxHandlers(main);
