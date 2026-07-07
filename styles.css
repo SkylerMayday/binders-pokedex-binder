@@ -628,6 +628,55 @@ section.binder-section h2 {
   color: var(--text-faint);
 }
 
+/* ---------- Changed-card badges (design-brief.md — "Freshly slotted") ---------- */
+
+/* Intensified gold frame on a freshly-added/replaced card: same box-shadow channel
+ * already used for the filled-slot premium ring, just turned up + a soft outer glow.
+ * This is the "emphasis"; the pill is the "label". One coherent gesture, not two. */
+.slot.filled.slot--new {
+  border-color: color-mix(in srgb, var(--gold) 55%, #4a3a24);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(245, 196, 81, 0.55),
+    0 0 12px rgba(245, 196, 81, 0.28);
+}
+
+@media (hover: hover) {
+  .slot.filled.slot--new:hover {
+    box-shadow:
+      0 6px 16px rgba(0, 0, 0, 0.55),
+      0 0 0 1px rgba(245, 196, 81, 0.7),
+      0 0 16px rgba(245, 196, 81, 0.38);
+  }
+}
+
+/* The "New" pill — top-right corner, gold, mirrors the changelog .latest-pill language. */
+.slot-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+  background: var(--gold);
+  color: #201a05;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1;
+  padding: 3px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  pointer-events: none; /* clicks pass through to the slot's zoom handler */
+  transform-origin: top right;
+  animation: badge-pop 0.35s ease-out both;
+}
+
+@keyframes badge-pop {
+  from { opacity: 0; transform: scale(0.6); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
 /* ---------- Skeleton loading state ---------- */
 
 .skeleton-wrap {
@@ -789,6 +838,10 @@ footer {
 
   .slot.filled:hover {
     transform: none;
+  }
+
+  .slot-badge {
+    animation: none;
   }
 
   .spine,

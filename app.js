@@ -88,9 +88,35 @@ function renderChangelog(changelog) {
   container.innerHTML = html;
 }
 
-function renderSlot(slot) {
+/*
+ * Changed-card badges — build the set of slotIds that were ADDED or REPLACED in the
+ * LATEST publish only. Empty set => no badges (identical to prior behavior).
+ * First-ever-publish rule: if there is 0 or 1 changelog entries, "everything is new"
+ * is not meaningful signal, so return an empty set (no badges on a first-ever binder).
+ * REMOVED is intentionally excluded — a removed slot has no filled card to badge.
+ */
+const BADGED_CHANGE_TYPES = new Set(['ADDED', 'REPLACED']);
+
+function computeNewSlotIds(changelog) {
+  if (!changelog || !Array.isArray(changelog.entries) || changelog.entries.length <= 1) {
+    return new Set();
+  }
+  const latest = changelog.entries[0];
+  const changes = (latest && Array.isArray(latest.changes)) ? latest.changes : [];
+  return new Set(
+    changes
+      .filter(c => BADGED_CHANGE_TYPES.has(c.type) && c.slotId)
+      .map(c => c.slotId)
+  );
+}
+
+function renderSlot(slot, newSlotIds = new Set()) {
   if (slot.cardId && slot.imageUrl) {
-    return `<div class="slot filled" tabindex="0" role="button" aria-label="View ${escapeHtml(slot.cardName || slot.slotName)} full size" data-image-url="${escapeHtml(slot.imageUrl)}" data-image-alt="${escapeHtml(slot.cardName || slot.slotName)}"><img loading="lazy" src="${slot.imageUrl}" alt="${escapeHtml(slot.cardName || slot.slotName)}"></div>`;
+    const isNew = slot.slotId && newSlotIds.has(slot.slotId);
+    const newClass = isNew ? ' slot--new' : '';
+    const label = escapeHtml(slot.cardName || slot.slotName) + (isNew ? ' — new in latest update' : '');
+    const badge = isNew ? `<span class="slot-badge" aria-hidden="true">New</span>` : '';
+    return `<div class="slot filled${newClass}" tabindex="0" role="button" aria-label="View ${label} full size" data-image-url="${escapeHtml(slot.imageUrl)}" data-image-alt="${escapeHtml(slot.cardName || slot.slotName)}"><img loading="lazy" src="${slot.imageUrl}" alt="${escapeHtml(slot.cardName || slot.slotName)}">${badge}</div>`;
   }
   return `<div class="slot empty">
     <div class="dex-number">#${slot.dexNumber || ''}</div>
@@ -98,14 +124,14 @@ function renderSlot(slot) {
   </div>`;
 }
 
-function renderSection(section) {
+function renderSection(section, newSlotIds = new Set()) {
   const filled = section.slots.filter(s => s.cardId).length;
   const total = section.slots.length;
   const pct = total > 0 ? Math.min(100, Math.round((filled / total) * 100)) : 0;
   let html = `<section class="binder-section">`;
   html += `<div class="section-header-row"><h2>${escapeHtml(section.name)}</h2><span class="section-pct">${pct}%</span></div>`;
   html += `<div class="section-bar-wrap">${barHtml(filled, total)}<div class="completion-label">${filled}/${total}</div></div>`;
-  html += `<div class="slot-grid">${section.slots.map(renderSlot).join('')}</div>`;
+  html += `<div class="slot-grid">${section.slots.map(s => renderSlot(s, newSlotIds)).join('')}</div>`;
   html += `</section>`;
   return html;
 }
@@ -178,10 +204,10 @@ const SPINE_COLOR_CLASS_BY_ID = {
 };
 const SPINE_COLOR_CLASS_FALLBACK = 'spine--other';
 
-function renderBinderTile(displayBinder) {
+function renderBinderTile(displayBinder, newSlotIds = new Set()) {
   const { filled, total } = displayBinderCompletion(displayBinder);
   const isOpen = !!binderTileOpenState[displayBinder.id];
-  const innerSections = displayBinder.sections.map(renderSection).join('');
+  const innerSections = displayBinder.sections.map(s => renderSection(s, newSlotIds)).join('');
   const spineColorClass = SPINE_COLOR_CLASS_BY_ID[displayBinder.id] || SPINE_COLOR_CLASS_FALLBACK;
   return `<div class="binder-tile${isOpen ? ' open' : ''}" data-binder-id="${displayBinder.id}">
     <button type="button" class="binder-tile-toggle spine ${spineColorClass}" aria-expanded="${isOpen}" aria-controls="binder-body-${displayBinder.id}">
@@ -227,6 +253,7 @@ function render(binderSnapshot, changelog) {
 
   renderChangelog(changelog);
 
+  const newSlotIds = computeNewSlotIds(changelog);
   const displayBinders = bucketSectionsIntoDisplayBinders(binderSnapshot);
   const main = document.getElementById('binders');
   // Design brief §4 / RISK 1: wrap tiles in a shelf container. Each .binder-tile
@@ -236,7 +263,8 @@ function render(binderSnapshot, changelog) {
   // shelf layout (styles.css) instead keeps `.binder-tile` as a normal flex item and
   // forces `.binder-tile-body { flex-basis: 100% }` onto its own wrapped row beneath
   // the spines — same visual result, zero DOM/logic restructuring here.
-  main.innerHTML = '<div class="shelf-wrap"><div class="shelf">' + displayBinders.map(renderBinderTile).join('') + '</div></div>';
+  main.innerHTML = '<div class="shelf-wrap"><div class="shelf">' +
+    displayBinders.map(b => renderBinderTile(b, newSlotIds)).join('') + '</div></div>';
 
   attachBinderTileHandlers(main);
   attachLightboxHandlers(main);
